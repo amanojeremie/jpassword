@@ -11,7 +11,10 @@ use db::create_db_then_pool;
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
 
-    let pool = create_db_then_pool("./test.db".to_string());
+    let mut path_to_db = std::env::current_exe().unwrap();
+    path_to_db.pop();
+    path_to_db.push("jpassword.db".to_string());
+    let pool = create_db_then_pool(path_to_db.as_path());
 
     HttpServer::new(move || {
         App::new()

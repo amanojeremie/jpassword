@@ -103,7 +103,6 @@ impl User {
 
         let mut stmt = conn.prepare("SELECT * FROM users WHERE hash = ? AND id <> ?").unwrap();
         if stmt.exists(params![username_hash, self.id]).unwrap() {
-            println!("POO");
             return Err(());
         }
 
@@ -118,7 +117,6 @@ impl User {
         let result = stmt.execute(params![username_hash, password_hash.to_vec(), salt, data.unwrap(), self.id]);
 
         if result.is_err() {
-            println!("POOP");
             return Err(());       
         }
         Ok(())
