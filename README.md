@@ -15,6 +15,14 @@ Once compiled, the application be executed via
 
 `cargo run`
 
+## Documentation
+
+Documentation can be built using
+
+`cargo doc`
+
+Once complete, documentation will be under `./target/jpassword`
+
 ## Client
 
 An example client is available [here.](https://github.com/amanojeremie/jpassword)
