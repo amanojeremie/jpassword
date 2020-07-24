@@ -7,6 +7,7 @@ static AEAD_ALG: &'static aead::Algorithm = &aead::AES_256_GCM;
 const CREDENTIAL_LEN: usize = digest::SHA256_OUTPUT_LEN;
 pub type Credential = [u8; CREDENTIAL_LEN];
 
+/// Creates a key to be used for sealing/opening plaintext/ciphertext via AEAD
 fn make_key<K: aead::BoundKey<OneNonceSequence>>(
     algorithm: &'static aead::Algorithm,
     key: &[u8],
@@ -17,6 +18,12 @@ fn make_key<K: aead::BoundKey<OneNonceSequence>>(
     K::new(key, nonce_sequence)
 }
 
+/// Seals a plaintext with a password returning the ciphertext, salt, and nonce on Ok
+///
+/// # Arguments
+///
+/// * `plaintext` - The plaintext vector of bytes to seal
+/// * `password` - The array of bytes used to create a password-based key
 pub fn aead_seal(plaintext: &Vec<u8>, password: &[u8]) -> Result<Vec<u8>, ()> {
     
     let mut password_cred: Credential = [0u8; CREDENTIAL_LEN];
@@ -39,6 +46,11 @@ pub fn aead_seal(plaintext: &Vec<u8>, password: &[u8]) -> Result<Vec<u8>, ()> {
     Ok(ciphertext)
 }
 
+/// Breaks down the vector of bytes returned by aead_seal
+/// To extract the ciphertext, salt, and nonce used for opening the ciphertext.
+/// # Arguments
+///
+/// * `ciphertext_salt_nonce` - The vector of bytes returned by aead_seal
 fn extract_ciphertext_salt_nonce(ciphertext_salt_nonce: &Vec<u8>) -> (Vec<u8>, Vec<u8>, Vec<u8>) {
     let ciphertext_slice = &ciphertext_salt_nonce
         [..ciphertext_salt_nonce.len() - AEAD_ALG.nonce_len() - SALT_LEN];
@@ -58,6 +70,10 @@ fn extract_ciphertext_salt_nonce(ciphertext_salt_nonce: &Vec<u8>) -> (Vec<u8>, V
     (ciphertext, salt, nonce)
 }
 
+/// Opens an AEAD sealed ciphertext, returning the plaintext
+/// # Arguments
+///
+/// * `ciphertext_salt_nonce` - The vector of bytes returned by aead_seal
 pub fn aead_open(ciphertext_salt_nonce: &Vec<u8>, password: &[u8]) -> Result<Vec<u8>, ()> {
     let (ciphertext, salt, nonce) = extract_ciphertext_salt_nonce(&ciphertext_salt_nonce);
 
@@ -80,6 +96,7 @@ pub fn aead_open(ciphertext_salt_nonce: &Vec<u8>, password: &[u8]) -> Result<Vec
     Ok(plaintext)
 }
 
+/// Represents a sequence of a single value to only be used once in the AEAD process
 struct OneNonceSequence(Option<aead::Nonce>);
 
 impl OneNonceSequence {
@@ -91,6 +108,7 @@ impl OneNonceSequence {
 }
 
 impl aead::NonceSequence for OneNonceSequence {
+    /// Return the value used for the creation of this sequence
     fn advance(&mut self) -> Result<aead::Nonce, error::Unspecified> {
         self.0.take().ok_or(error::Unspecified)
     }

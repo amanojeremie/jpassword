@@ -1,6 +1,7 @@
 use actix_web::web;
 use crate::api::{self, user_controller};
 
+/// Configures the actix_web application and it's endpoints
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/jpassword")

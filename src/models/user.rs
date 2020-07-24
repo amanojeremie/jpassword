@@ -6,6 +6,7 @@ use std::str;
 
 const PASSWORD_HASH_LEN: usize = 256;
 
+/// Represents a User of this application
 pub struct User {
     id: i64,
     pub username: String,
@@ -16,6 +17,13 @@ pub struct User {
 
 impl User {
 
+    /// Creates a new User in the database, returning the new User
+    ///
+    /// # Arguments
+    ///
+    /// * `conn` - A rusqlite connection to the database
+    /// * `username` - The name of the new User
+    /// * `password` - The password of the new User, used for encryption of credentials
     pub fn create(conn: &Connection, username: String, password: String) -> Result<Self, ()> {
 
         if username.contains(":") {
@@ -55,6 +63,13 @@ impl User {
         })
     }
 
+    /// Fetches an existing user, returning the User if found
+    ///
+    /// # Arguments
+    ///
+    /// * `conn` - A rusqlite connection to the database
+    /// * `username` - The name of the User
+    /// * `password` - The password of the User
     pub fn login(conn: &Connection, username: String, password: String) -> Result<Self, ()> {
         let username_hash = hex::encode(hash(username.as_bytes()));
         let mut stmt = conn.prepare("SELECT id, hash, password, salt, data FROM users WHERE hash = ?").unwrap();
@@ -98,6 +113,13 @@ impl User {
         })
     }
 
+    /// Saves the state of this User into the database
+    ///
+    /// # Arguments
+    ///
+    /// * `conn` - A rusqlite connection to the database
+    /// * `username` - The name of the User
+    /// * `password` - The password of the User
     pub fn save(&self, conn: &Connection) -> Result<(), ()> {
         let username_hash = hex::encode(hash(self.username.as_bytes()));
 

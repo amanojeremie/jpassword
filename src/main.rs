@@ -8,6 +8,8 @@ use actix_web::{http, App, HttpServer};
 use actix_cors::{Cors};
 use db::create_db_then_pool;
 
+/// Creates an HTTP server serving as a RESTful interface for
+/// password management
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
 
